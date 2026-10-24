@@ -1,0 +1,12 @@
+export const roadmap = [
+  { title: "Independent legal review", category: "Trust", horizon: "Next", outcome: "Validate each rule branch, exemption and letter with a qualified reviewer.", dependency: "Reviewer sign-off and a dated rule-change process." },
+  { title: "Verified live deployment", category: "Trust", horizon: "Next", outcome: "Publish a monitored Firebase backend with a shared request budget and a rehearsed rollback.", dependency: "A Firebase project, billing setup, exact site origin and live smoke tests." },
+  { title: "Accessibility and print review", category: "Workflow", horizon: "Next", outcome: "Test screen-reader journeys and clean printed letters across real browsers.", dependency: "Assistive-technology testing and device/browser verification." },
+  { title: "Evidence checklist", category: "Workflow", horizon: "Next", outcome: "Turn each assessment into a short list of the records that would support it.", dependency: "Jurisdiction-specific review; no document uploads needed for the first version." },
+  { title: "Connections and missed flights", category: "Coverage", horizon: "Later", outcome: "Assess a whole itinerary, ticket continuity and the final-destination delay.", dependency: "A separate itinerary model, connection rules and new legal boundary tests." },
+  { title: "UK, EEA and Swiss coverage", category: "Coverage", horizon: "Later", outcome: "Explain the applicable framework for more routes and operating carriers.", dependency: "Verified local sources, historical applicability and qualified review." },
+  { title: "Saved cases across devices", category: "Workflow", horizon: "Later", outcome: "Offer an optional case workspace using Firebase Auth and Firestore.", dependency: "Consent, per-user access rules, deletion/export controls and retention limits." },
+  { title: "Verified flight evidence", category: "Trust", horizon: "Later", outcome: "Compare entered times against an authorised flight-status data source.", dependency: "A licensed provider, provenance, pricing and correction handling." },
+  { title: "Baggage and downgrades", category: "Coverage", horizon: "Later", outcome: "Add distinct assessments for other common travel disruptions.", dependency: "Separate legal models, currencies, evidence requirements and tests." },
+  { title: "Local-language guidance", category: "Workflow", horizon: "Later", outcome: "Make the explanation and letter easier to understand in more languages.", dependency: "Human-reviewed legal translations and accessible locale-specific layouts." },
+] as const;

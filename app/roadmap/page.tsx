@@ -1,0 +1,8 @@
+import type { Metadata } from "next";
+import Link from "next/link";
+import { SiteHeader, SiteFooter } from "../../components/site-chrome";
+import { RoadmapBoard } from "../../components/roadmap-board";
+export const metadata: Metadata = { title: "What’s next · SkyClaim" };
+export default function RoadmapPage() {
+  return <><a href="#main" className="skip-link">Skip to content</a><SiteHeader /><main id="main"><section className="page-masthead"><div className="shell"><Link href="/" className="back-link">← Back to SkyClaim</Link><p className="eyebrow">The next chapter</p><h1>More useful.<br /><em>Still in your hands.</em></h1><p className="page-deck">A considered roadmap for a better passenger-rights tool. First, strengthen trust in the journey that works. Then expand where the rules and evidence support it.</p><div className="masthead-foot"><span>EU261 · India DGCA · US DOT available now</span><Link href="/#check">Try the current checker ↗</Link></div></div></section><section className="shell page-body"><div className="editorial-note"><span className="small-seal">SC</span><p><strong>Planned means planned.</strong> These features are not available yet. Order can change after legal review, user feedback and deployment testing. No account or signup is required to explore this roadmap.</p></div><RoadmapBoard /><div className="page-endnote"><h2>A useful boundary is a feature, too.</h2><p>Automatic claim submission, court filings and guaranteed recovery are outside the current product. You decide what to send, to whom and when.</p><Link href="/privacy">See current scope and privacy ↗</Link></div></section></main><SiteFooter /></>;
+}

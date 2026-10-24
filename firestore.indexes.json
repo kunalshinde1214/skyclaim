@@ -1,0 +1,6 @@
+{
+  "indexes": [],
+  "fieldOverrides": [
+    { "collectionGroup": "requestBudgets", "fieldPath": "expiresAt", "ttl": true, "indexes": [] }
+  ]
+}

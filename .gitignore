@@ -1,0 +1,14 @@
+node_modules/
+.next/
+out/
+coverage/
+.env*
+!.env.example
+*.tsbuildinfo
+*.log
+artifacts/
+.npm-cache/
+/devpost/learner-profile.md
+# Original user-supplied references are local inputs, not release artifacts.
+/reference/
+/design/

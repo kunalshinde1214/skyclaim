@@ -1,0 +1,19 @@
+# Firebase App Hosting. Complete docs/firebase-setup.md before the first rollout.
+runConfig:
+  minInstances: 0
+  maxInstances: 2
+  concurrency: 20
+  cpu: 1
+  memoryMiB: 512
+env:
+  - variable: SKYCLAIM_DEPLOYMENT_MODE
+    value: production
+    availability: [RUNTIME]
+  - variable: SKYCLAIM_RATE_LIMIT_BACKEND
+    value: firestore
+    availability: [RUNTIME]
+  - variable: SKYCLAIM_ENABLE_AI
+    value: "false"
+    availability: [RUNTIME]
+# Set APP_ORIGIN to the exact https:// backend/custom-domain origin in Firebase.
+# Optional AI: enable explicitly and reference OPENAI_API_KEY in Secret Manager.
