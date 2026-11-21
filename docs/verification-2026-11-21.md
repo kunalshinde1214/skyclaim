@@ -1,8 +1,15 @@
 # Verification record — 21 November 2026
 
 Release candidate, not public-launch approval. Local runtime has changed since
-October to Node24.22.1; the configured Firebase/CI runtime remains Node22. The local
-checks below are Node24 evidence. Check the new hosted Node22 run before rollout.
+October to Node24.22.1; the configured Firebase/CI runtime remains Node22. Local
+checks below are Node24 evidence. The clean hosted Node22 run also **passed** for
+code commit e48a7c8: https://github.com/kunalshinde1214/skyclaim/actions/runs/44894019686.
+It includes npmci, audit, typecheck,246tests, production build and HTTP smoke.
+
+The first hosted run failed clean installation because the lock lacked two optional
+WASM package resolutions. The repair added exact registry-verified core1.11.3 and
+wasi-threads1.2.3 entries without changing application versions or bypassing npmci.
+The green clean run verifies the repair; it is not a live Firebase acceptance test.
 
 | Check | Result |
 | --- | --- |

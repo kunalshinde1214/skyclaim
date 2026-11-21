@@ -41,6 +41,10 @@ the latest reviewed commit, not an earlier screenshot's commit. The repository
 currently uses `codex/release-candidate`. Inspect the actual supported framework
 adapter and build output; a local Next.js build is not proof of adapter support.
 
+The code baseline e48a7c8 passed clean Node22 CI:
+https://github.com/kunalshinde1214/skyclaim/actions/runs/44894019686.
+Use the branch's latest reviewed state, including the subsequent verification notes.
+
 Keep automatic rollout controlled until staging acceptance passes. apphosting.yaml
 already sets scale-to-zero, at most 2 instances, concurrency20 and AI off.
 
