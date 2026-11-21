@@ -5,6 +5,7 @@ import { createLetter } from "../lib/letter-template";
 import { emptyLetterDetails, resolveLetterDetails, type LetterDetails } from "../lib/letter-details";
 import { todayIso } from "../lib/schema";
 import type { EvaluationResponse } from "../lib/types";
+import { LetterEvidence } from "./letter-evidence";
 
 export function ClaimLetter({ result }: { result: EvaluationResponse }) {
   const [details, setDetails] = useState(() => emptyLetterDetails(todayIso()));
@@ -81,6 +82,7 @@ export function ClaimLetter({ result }: { result: EvaluationResponse }) {
     </details>
 
     <p className={`letter-review ${missing.length ? "incomplete" : "complete"}`} role="status">{missing.length ? `${missing.length} ${missing.length === 1 ? "field" : "fields"} to complete before sending. You can also copy the draft and fill it in yourself.` : "Your details are filled in. Review the letter, flight facts and claims address before sending."}</p>
+    <LetterEvidence input={input} />
     <div className="letter-frame">
       <div className="letter-toolbar"><span className="eyebrow">{conditional ? "Evidence request" : "Passenger rights request"} · draft</span><span className="letter-mode">{mode === "ai" ? "AI-assisted explanation" : "Prepared from your facts"}</span></div>
       <pre className="print-letter" tabIndex={0} aria-label="Your claim letter">{letter}</pre>

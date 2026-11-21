@@ -6,7 +6,7 @@ import { airlines } from "../lib/airlines";
 import { claimSchema, excuseOptions, todayIso, type ClaimInput } from "../lib/schema";
 import type { EvaluationResponse } from "../lib/types";
 import { ClaimLetter } from "../components/claim-letter";
-import { HISTORY_KEY, readHistory, recordFlight, type SavedFlight } from "../lib/history";
+import { HISTORY_KEY, HISTORY_PREFERENCE_KEY, readHistory, recordFlight, type SavedFlight } from "../lib/history";
 import { requestEvaluation, EvaluationError } from "../lib/evaluate-client";
 import { isRegional, jurisdictionNames, eventNames } from "../lib/regional-rules";
 import { RegionalFields } from "../components/regional-fields";
@@ -79,14 +79,14 @@ function EuResult({ result }: { result: EvaluationResponse & { computed: Compute
   const hasLetter = !!drafted.claimLetter;
   const conditional = c.verdict === "borderline";
   const good = c.verdict === "likely_eligible";
-  const status = good ? "Eligible" : conditional ? "Borderline" : c.verdict === "outside_scope" ? "Outside scope" : "Ineligible";
+  const status = good ? "Estimate" : conditional ? "Needs review" : c.verdict === "outside_scope" ? "Outside scope" : "Below threshold";
   const title = good ? "A delay worth claiming for." : conditional ? "A case that needs a closer look." : c.verdict === "outside_scope" ? "This route needs a different check." : "Below the compensation threshold.";
   useEffect(() => { heading.current?.focus({ preventScroll: true }); document.getElementById("verdict")?.scrollIntoView({ behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth", block: "start" }); }, []);
   return <section id="verdict" className="results-section" aria-labelledby="verdict-heading">
-    <div className="section-label"><span>02</span> Your verdict <i /></div>
+    <div className="section-label"><span>02</span> Your assessment <i /></div>
     <div className={`verdict-card ${good ? "positive" : conditional ? "conditional" : "negative"}`}>
       <div className="verdict-top"><span className="eyebrow">Case assessment · {input.flightNumber}</span><span className="mono">{input.originIata} <span aria-hidden="true">→</span> {input.destIata}</span></div>
-      <div className="verdict-main"><div><p className="eyebrow">{conditional ? "Potential compensation · if conditions are met" : good ? "Your compensation · per passenger" : "EU261 arrival delay check"}</p><h2 id="verdict-heading" tabIndex={-1} ref={heading}>{title}</h2>
+      <div className="verdict-main"><div><p className="eyebrow">{conditional ? "Potential compensation · if conditions are met" : good ? "Estimated compensation · per passenger" : "EU261 arrival delay check"}</p><h2 id="verdict-heading" tabIndex={-1} ref={heading}>{title}</h2>
         {hasLetter && <div className="amount" aria-label={`${euro(c.amountPerPassengerEur)} per passenger, ${conditional ? "conditional" : "estimated"}`}><AnimatedAmount amount={c.amountPerPassengerEur} /><span>/ passenger</span></div>}
         <p className="verdict-summary">{c.reason}</p></div><span className="stamp verdict-stamp" aria-label={`Verdict: ${status}`}>{status}</span></div>
       <div className="calculation-grid"><div><span>Great-circle distance</span><strong>{c.distanceKm.toLocaleString("en-GB")} km</strong></div><div><span>Arrival delay</span><strong>{c.delayHours} hours</strong></div><div><span>{c.verdict === "outside_scope" ? "Route band (indicative)" : "Distance band"}</span><strong>Tier {c.tier}{c.intraEu ? " · intra-EU" : ""}</strong></div><div><span>{c.verdict === "outside_scope" ? "Compensation" : `${conditional ? "Potential total" : "Total"} · ${c.passengers} ${c.passengers === 1 ? "passenger" : "passengers"}`}</span><strong>{c.verdict === "outside_scope" ? "Not assessed" : euro(c.totalEur)}</strong></div></div>
@@ -107,6 +107,7 @@ export default function Home() {
   const [error, setError] = useState("");
   const [checkNotice, setCheckNotice] = useState("");
   const [history, setHistory] = useState<SavedFlight[]>([]);
+  const [rememberFlights, setRememberFlights] = useState(false);
   const [historyNotice, setHistoryNotice] = useState("");
   const [pickerKey, setPickerKey] = useState(0);
   const submitting = useRef(false);
@@ -117,7 +118,15 @@ export default function Home() {
   const minimumDate = regime === "india" ? "2023-02-15" : regime === "us_dot" ? event === "denied_boarding" ? "2025-01-22" : "2024-05-16" : "2021-01-01";
   const showArrivalDelay = regime === "eu261" || (regime === "us_dot" && event !== "cancellation" && !(event === "denied_boarding" && form.replacementOffered === "no"));
   useEffect(() => {
-    try { setHistory(readHistory(localStorage.getItem(HISTORY_KEY))); }
+    try {
+      const remember = localStorage.getItem(HISTORY_PREFERENCE_KEY) === "yes";
+      setRememberFlights(remember);
+      if (remember) {
+        const saved = readHistory(localStorage.getItem(HISTORY_KEY));
+        setHistory(saved);
+        localStorage.setItem(HISTORY_KEY, JSON.stringify(saved));
+      } else if (localStorage.getItem(HISTORY_KEY)) setHistoryNotice("An earlier version saved flight facts on this device. Use Clear saved flights to remove them, or opt in to restore recent checks.");
+    }
     catch { /* Browsing with storage disabled still supports the entire claim flow. */ }
     return () => requestController.current?.abort();
   }, []);
@@ -131,6 +140,23 @@ export default function Home() {
   function loadExample() { loadFlight(examples[regime]); }
   function loadFlight(input: ClaimInput) { requestController.current?.abort(); requestController.current = null; setCheckNotice(""); setLoading(false); submitting.current = false; setForm(input); setPickerKey((n) => n + 1); setErrors({}); setError(""); setResult(null); document.getElementById("check")?.scrollIntoView({ behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth" }); }
   function clearHistory() { setHistory([]); try { localStorage.removeItem(HISTORY_KEY); setHistoryNotice("Saved flight details cleared from this browser."); } catch { setHistoryNotice("Browser storage is unavailable."); } }
+  function changeRememberFlights(enabled: boolean) {
+    try {
+      if (enabled) {
+        const saved = readHistory(localStorage.getItem(HISTORY_KEY));
+        localStorage.setItem(HISTORY_PREFERENCE_KEY, "yes");
+        localStorage.setItem(HISTORY_KEY, JSON.stringify(saved));
+        setHistory(saved);
+        setRememberFlights(true);
+        setHistoryNotice("This browser will remember up to five checks for 30 days. Avoid this on a shared device.");
+      } else {
+        localStorage.removeItem(HISTORY_PREFERENCE_KEY);
+        localStorage.removeItem(HISTORY_KEY);
+        setRememberFlights(false); setHistory([]);
+        setHistoryNotice("Remembering is off. Saved flight facts were cleared from this browser.");
+      }
+    } catch { setRememberFlights(false); setHistoryNotice("Browser storage is unavailable. Your check still works without saving."); }
+  }
   function cancelCheck() {
     if (!submitting.current || !requestController.current) return;
     requestController.current?.abort();
@@ -151,9 +177,11 @@ export default function Home() {
       const payload = await requestEvaluation(valid.data, { signal: controller.signal });
       if (controller.signal.aborted || requestController.current !== controller) return;
       setResult(payload);
-      const saved = recordFlight(history, valid.data);
-      setHistory(saved);
-      try { localStorage.setItem(HISTORY_KEY, JSON.stringify(saved)); } catch { setHistoryNotice("Your check is ready. Browser storage is unavailable, so this flight was not saved."); }
+      if (rememberFlights) {
+        const saved = recordFlight(history, valid.data);
+        setHistory(saved);
+        try { localStorage.setItem(HISTORY_KEY, JSON.stringify(saved)); } catch { setHistoryNotice("Your check is ready. Browser storage is unavailable, so this flight was not saved."); }
+      }
     } catch (err) {
       if (!controller.signal.aborted && requestController.current === controller) {
         if (err instanceof EvaluationError) {
@@ -175,21 +203,21 @@ export default function Home() {
       <section id="how-it-works" className="how-section"><div className="shell how-grid"><div><span className="step-number">01</span><div><h2>Tell us what happened</h2><p>Your route, your delay, the airline’s reason.</p></div></div><div><span className="step-number">02</span><div><h2>See where you stand</h2><p>A clear verdict, with the calculation shown.</p></div></div><div><span className="step-number">03</span><div><h2>Make your case</h2><p>Copy your letter. Send it on your terms.</p></div></div></div></section>
       <ProductStory />
       <section id="check" className="check-section shell" aria-labelledby="check-heading"><div className="section-label"><span>01</span> Start your case <i /></div><div className="check-heading"><div><h2 id="check-heading">Let’s get the facts straight.</h2><p>A few details are all we need. Have your booking handy.</p></div><button type="button" className="demo-button" disabled={loading} onClick={loadExample}>Try an example <Arrow /></button></div>
-        <div className="check-layout"><form className="case-form" onSubmit={submit} noValidate aria-busy={loading}><div className="case-form-head"><span className="eyebrow"><Plane size={16} /> Flight details</span><span className="mono">{jurisdictionNames[regime]} · RIGHTS CHECK</span></div><fieldset disabled={loading}><legend className="sr-only">Flight details</legend><div className="form-body"><div className="form-grid regime-fields">
+        <p className="scope-notice">Research preview: selected direct-flight rules only. No independent legal review or verified flight data. <a href="/trust">Check coverage and unresolved conditions</a> before relying on an estimate.</p><div className="check-layout"><form className="case-form" onSubmit={submit} noValidate aria-busy={loading}><div className="case-form-head"><span className="eyebrow"><Plane size={16} /> Flight details</span><span className="mono">{jurisdictionNames[regime]} · RIGHTS CHECK</span></div><fieldset disabled={loading}><legend className="sr-only">Flight details</legend><div className="form-body"><div className="form-grid regime-fields">
           <Field id="jurisdiction" label="Which passenger rights should we check?" hint="Choose one law. Routes can overlap; amounts are not added together."><select id="jurisdiction" value={regime} onChange={(e) => changeCheck(e.target.value as NonNullable<ClaimInput["jurisdiction"]>)}><option value="eu261">European Union · EU261</option><option value="india">India · DGCA</option><option value="us_dot">United States · DOT</option></select></Field>
           <Field id="event" label="What happened?" error={errors.event} hint={regime === "eu261" ? "The EU checker currently supports arrival delays." : "Choose the disruption you want to assess."}><select {...inputProps("event")} value={event} onChange={(e) => changeCheck(regime, e.target.value as NonNullable<ClaimInput["event"]>)}><option value="delay">Flight delay</option>{regime !== "eu261" && <><option value="cancellation">Airline cancelled the flight</option><option value="denied_boarding">Denied boarding / oversales</option></>}</select></Field>
           </div><div className="form-divider" /><div className="route-fields"><AirportPicker key={`origin-${pickerKey}`} id="originIata" label="Departed from" value={form.originIata} onChange={(value) => update("originIata", value)} error={errors.originIata} /><button className="swap-button" type="button" aria-label="Swap departure and arrival airports" onClick={() => { setForm((previous) => ({ ...previous, originIata: previous.destIata, destIata: previous.originIata })); setPickerKey((n) => n + 1); setResult(null); setError(""); setCheckNotice(""); setErrors((previous) => ({ ...previous, originIata: "", destIata: "" })); }}>⇄</button><AirportPicker key={`dest-${pickerKey}`} id="destIata" label="Arrived at" value={form.destIata} onChange={(value) => update("destIata", value)} error={errors.destIata} /></div><p className="route-hint">Use your actual departure and final arrival airports. This version assesses direct flights only.</p><div className="form-divider" />
           <div className="form-grid"><Field id="airline" label="Operating airline" error={errors.airline} hint="The airline that operated the flight, including its licensed subsidiary."><input {...inputProps("airline")} list="airline-list" autoComplete="off" placeholder="e.g. Air France" value={form.airline} onChange={(e) => { update("airline", e.target.value); update("carrierLicence", "unknown"); }} /><datalist id="airline-list">{airlines.map((airline) => <option value={airline.name} key={airline.name} />)}</datalist></Field><Field id="flightNumber" label="Flight number" error={errors.flightNumber} hint="Find this on your booking or boarding pass."><input {...inputProps("flightNumber")} className="mono" autoComplete="off" placeholder="e.g. AF 008" maxLength={12} value={form.flightNumber} onChange={(e) => update("flightNumber", e.target.value.toUpperCase())} /></Field>
-          <Field id="date" label="Flight date" error={errors.date} hint={`Original departure date. This rule version supports dates from ${minimumDate}.`}><input {...inputProps("date")} type="date" min={minimumDate} max={todayIso()} value={form.date} onChange={(e) => update("date", e.target.value)} /></Field>{showArrivalDelay && <Field id="delayHours" label={regime === "us_dot" ? event === "denied_boarding" ? "Offered arrival delay" : "Scheduled arrival change" : "Arrival delay"} error={errors.delayHours} hint={regime === "us_dot" ? event === "denied_boarding" ? "Planned arrival of the offered substitute versus the original schedule, even if you declined it. Half-hour steps." : "How much later the airline’s changed schedule arrived at destination. Half-hour steps; not time spent on the tarmac." : "Hours late at your final destination, in half-hour steps."}><div className="input-with-unit"><input {...inputProps("delayHours")} type="number" inputMode="decimal" min={0} max={72} step={0.5} value={Number.isNaN(form.delayHours) ? "" : form.delayHours} onChange={(e) => update("delayHours", e.target.value === "" ? NaN : Number(e.target.value))} /><span>hours</span></div></Field>}
+          <Field id="date" label="Flight date" error={errors.date} hint={`Original departure date. This rule version supports dates from ${minimumDate}.`}><input {...inputProps("date")} type="date" min={minimumDate} max={todayIso()} value={form.date} onChange={(e) => update("date", e.target.value)} /></Field>{showArrivalDelay && <Field id="delayHours" label={regime === "us_dot" ? event === "denied_boarding" ? "Offered arrival delay" : "Scheduled arrival change" : "Arrival delay"} error={errors.delayHours} hint={regime === "us_dot" ? event === "denied_boarding" ? "Planned arrival of the offered substitute versus the original schedule, even if you declined it. Use exact hours, such as 3.75 for 3 hours 45 minutes. Do not round." : "How much later the airline’s changed schedule arrived at destination. Use exact hours; not time spent on the tarmac." : "Hours late at your final destination, as exact hours (3.75 means 3 hours 45 minutes). Do not round."}><div className="input-with-unit"><input {...inputProps("delayHours")} type="number" inputMode="decimal" min={0} max={72} step="any" value={Number.isNaN(form.delayHours) ? "" : form.delayHours} onChange={(e) => update("delayHours", e.target.value === "" ? NaN : Number(e.target.value))} /><span>hours</span></div></Field>}
           <Field id="passengers" label="Affected passengers" error={errors.passengers} hint="Only include passengers covered by this claim."><select {...inputProps("passengers")} value={form.passengers} onChange={(e) => update("passengers", Number(e.target.value))}>{Array.from({ length: 9 }, (_, i) => <option key={i} value={i + 1}>{i + 1} {i ? "passengers" : "passenger"}</option>)}</select></Field><Field id="excuse" label="What reason did the airline give?" error={errors.excuse} hint="Not sure? Choose “No reason given”."><select {...inputProps("excuse")} value={form.excuse} onChange={(e) => update("excuse", e.target.value as ClaimInput["excuse"])}>{excuseOptions.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}</select></Field>
           {regime === "eu261" && !knownAirline && form.airline.length > 1 && <Field id="carrierLicence" label="Does the operating airline hold an EU licence?" error={errors.carrierLicence} hint="Needed for flights arriving from outside the EU. If unsure, we’ll flag it for review." className="full-width"><select {...inputProps("carrierLicence")} value={form.carrierLicence} onChange={(e) => update("carrierLicence", e.target.value as ClaimInput["carrierLicence"])}><option value="unknown">I’m not sure</option><option value="eu">Yes — EU licensed</option><option value="non_eu">No — licensed outside the EU</option></select></Field>}
           {regime !== "eu261" && <RegionalFields form={form} errors={errors} update={update} />}
           </div><div className="form-note"><span aria-hidden="true">ⓘ</span><p>{regime === "eu261" ? "This checks arrival delays under EU261 for EU27 routes. Connections, cancellations and denied boarding need a separate assessment." : "Direct flights only. Refunds and cash compensation are separate. The same fare and circumstances must apply to everyone in a group check. Choose the correct currency; no exchange-rate conversion is applied."}</p></div></div></fieldset>
-          <div className="form-submit"><button className="button primary" type="submit" disabled={loading}>{loading ? <><span className="spinner" /> Checking your flight…</> : <>Check my eligibility <Arrow /></>}</button>{loading && <button className="button secondary cancel-check" type="button" onClick={cancelCheck}>Cancel check</button>}<span>Free, always. No claim is sent for you.</span></div>
+          <div className="form-submit"><button className="button primary" type="submit" disabled={loading}>{loading ? <><span className="spinner" /> Checking your flight…</> : <>Check my eligibility <Arrow /></>}</button>{loading && <button className="button secondary cancel-check" type="button" onClick={cancelCheck}>Cancel check</button>}<span>Free in this preview. No claim is sent for you.</span></div>
           <div role="status" className={loading ? "loading-note" : "sr-only"}>{loading ? "Applying the selected passenger-rights rules and preparing your result…" : ""}</div>{checkNotice && <p className="check-notice" role="status">{checkNotice}</p>}{error && <div className="error-note" role="alert">{error}</div>}
         </form>
         <aside className="rights-aside" id="rights">{regime !== "eu261" ? <RegionalRights india={regime === "india"} /> : <div className="rights-card pinstripe-dark"><span className="eyebrow">A right, not a favour.</span><h3>Long delay.<br />Clear rules.</h3><p>Compensation is set by law. Your distance and arrival delay determine the band.</p><div className="tariff"><div><span>Up to 1,500 km</span><strong>€250</strong></div><div><span>1,500–3,500 km<small>also intra-EU over 1,500 km</small></span><strong>€400</strong></div><div><span>Over 3,500 km<small>outside the intra-EU band</small></span><strong>€600</strong></div></div><p className="rights-small">Arrival delay must reach 3 hours. Long-haul flights arriving 3 to under 4 hours late fall in the €300 band. Extraordinary circumstances can affect entitlement.</p><a href="https://europa.eu/youreurope/citizens/travel/passenger-rights/air/index_en.htm" target="_blank" rel="noreferrer">Read your EU passenger rights <span aria-hidden="true">↗</span></a></div>}<div className="privacy-note"><svg width="22" height="24" viewBox="0 0 24 26" fill="none" stroke="currentColor" strokeWidth="1.3" aria-hidden="true"><path d="m12 2 9 4v7c0 6-9 11-9 11S3 19 3 13V6l9-4Z"/><path d="m8 13 3 3 5-6"/></svg><div><strong>Your details stay yours.</strong><p>No account. Recent flight facts stay in this browser. Optional personal letter details stay in this page’s memory and are never sent to the server or AI.</p></div></div></aside></div>
-        {history.length > 0 && <div className="history-section"><div><p className="eyebrow">Recent checks · this browser only</p><button type="button" onClick={clearHistory} disabled={loading}>Clear saved flights</button></div><ul>{history.map((entry) => <li key={JSON.stringify(entry.input)}><button type="button" disabled={loading} onClick={() => loadFlight(entry.input)}><span className="history-route mono">{entry.input.originIata} → {entry.input.destIata}</span><span className="history-description"><span>{entry.input.flightNumber} · {entry.input.date}</span><small>{jurisdictionNames[entry.input.jurisdiction ?? "eu261"]} · {eventNames[entry.input.event ?? "delay"]} · {entry.input.passengers} {entry.input.passengers === 1 ? "passenger" : "passengers"} · {excuseOptions.find((option) => option.value === entry.input.excuse)?.label}</small></span><span aria-hidden="true">↗</span></button></li>)}</ul></div>}{historyNotice && <p className="history-notice" role="status">{historyNotice}</p>}
+        <div className="history-choice"><label><input type="checkbox" checked={rememberFlights} disabled={loading} onChange={(event) => changeRememberFlights(event.target.checked)} /> Remember my flight facts on this device for 30 days</label><p>Optional. Up to five checks, including route, date and fare. Leave off on shared devices. Personal letter details are never saved.</p><button type="button" onClick={clearHistory} disabled={loading}>Clear saved flights</button></div>{history.length > 0 && <div className="history-section"><div><p className="eyebrow">Recent checks · this browser only</p></div><ul>{history.map((entry) => <li key={JSON.stringify(entry.input)}><button type="button" disabled={loading} onClick={() => loadFlight(entry.input)}><span className="history-route mono">{entry.input.originIata} → {entry.input.destIata}</span><span className="history-description"><span>{entry.input.flightNumber} · {entry.input.date}</span><small>{jurisdictionNames[entry.input.jurisdiction ?? "eu261"]} · {eventNames[entry.input.event ?? "delay"]} · {entry.input.passengers} {entry.input.passengers === 1 ? "passenger" : "passengers"} · {excuseOptions.find((option) => option.value === entry.input.excuse)?.label}</small></span><span aria-hidden="true">↗</span></button></li>)}</ul></div>}{historyNotice && <p className="history-notice" role="status">{historyNotice}</p>}
       </section>
       {result && <div className="shell" key={JSON.stringify(result.input)}><Result result={result} /></div>}
       <ProductQuestions />

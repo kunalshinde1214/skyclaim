@@ -22,7 +22,7 @@ export function RegionalFields({ form, errors, update }: { form: ClaimInput; err
     {india && choice("indianCarrier", "Is the operating airline licensed in India?", "Foreign-carrier compensation needs a review under CAR para 3.6.1.", [...yesNo, ["unknown", "I’m not sure"]])}
     {india && event !== "denied_boarding" && number("blockMinutes", "Scheduled block time (minutes)", "Gate-to-gate duration on the original schedule, not the delay.", 1, 1440)}
     {india && event === "delay" && <>
-      {number("departureDelayHours", "Expected departure delay (hours)", "Measured from the original schedule, or qualifying revised schedule. Half-hour steps.", 0.5, 168)}
+      {number("departureDelayHours", "Expected departure delay (hours)", "Measured from the original schedule, or qualifying revised schedule. Use exact hours, such as 3.75 for 3 hours 45 minutes. Do not round.", 0.5, 168)}
       {choice("checkedInOnTime", "Did you check in on time?", "Required for the delay meals entitlement.", yesNo)}
       {choice("nightDeparture", "Was departure scheduled between 20:00 and 03:00?", "Use local time at departure. This affects the hotel threshold.", yesNo)}
     </>}

@@ -34,8 +34,10 @@ async function initialiseFirebaseStore(): Promise<BudgetStore> {
   } };
 }
 
-export async function admitEvaluation(request: Request): Promise<Response | undefined> {
+export function checkEvaluationAccess(request: Request): Response | undefined {
   const common = { "Cache-Control": "no-store" };
+  const unavailable = () => Response.json({ error: "Flight checks are temporarily unavailable. Please try again later." }, { status: 503, headers: { ...common, "Retry-After": "60" } });
+  if (process.env.SKYCLAIM_CHECKS_ENABLED === "false") return unavailable();
   const origin = request.headers.get("origin");
   const configured = process.env.APP_ORIGIN;
   const requestOrigin = new URL(request.url).origin;
@@ -51,11 +53,25 @@ export async function admitEvaluation(request: Request): Promise<Response | unde
   if (origin && origin !== expectedOrigin) return Response.json({ error: "Open SkyClaim directly to check a flight." }, { status: 403, headers: common });
   if (request.headers.get("sec-fetch-site") === "cross-site") return Response.json({ error: "Open SkyClaim directly to check a flight." }, { status: 403, headers: common });
   const live = process.env.SKYCLAIM_DEPLOYMENT_MODE === "production";
+  const loopback = (value: string) => {
+    try { return ["localhost", "127.0.0.1", "[::1]"].includes(new URL(value).hostname); } catch { return false; }
+  };
+  // A production build may run locally for demos, but cannot silently become a
+  // public service with per-process budgets when deployment config was omitted.
+  if (process.env.NODE_ENV === "production" && !live &&
+    (configured || !loopback(requestOrigin) || !loopback(expectedOrigin))) return unavailable();
   let validLiveOrigin = false;
   try { const url = new URL(configured || ""); validLiveOrigin = url.protocol === "https:" && url.origin === configured; } catch { /* Fail closed below. */ }
   if (live && (!validLiveOrigin || process.env.SKYCLAIM_RATE_LIMIT_BACKEND !== "firestore" || process.env.FIRESTORE_EMULATOR_HOST)) {
     return Response.json({ error: "Flight checks are temporarily unavailable. Please try again later." }, { status: 503, headers: { ...common, "Retry-After": "60" } });
   }
+  return;
+}
+
+export async function admitEvaluation(request: Request): Promise<Response | undefined> {
+  const rejection = checkEvaluationAccess(request);
+  if (rejection) return rejection;
+  const common = { "Cache-Control": "no-store" };
   try {
     let timer: ReturnType<typeof setTimeout> | undefined;
     const operation = async () => {

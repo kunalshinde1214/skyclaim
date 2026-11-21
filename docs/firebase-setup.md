@@ -3,6 +3,13 @@
 Prepared 19 October 2026. The user selected **prepare a new Firebase project**.
 No project, billing account or public deployment has been created by this task.
 
+Search metadata uses the exact HTTPS APP_ORIGIN for canonicals and social links.
+Previews remain noindex with an empty sitemap. After the public-launch review,
+set SKYCLAIM_ALLOW_INDEXING=true alongside SKYCLAIM_DEPLOYMENT_MODE=production
+to publish the sitemap and allow public-page indexing. The default is false;
+robots.txt always excludes the API when indexing is enabled. Recheck the live
+canonical, robots.txt and sitemap.xml after deployment.
+
 ## What is implemented
 
 Next.js remains the application framework. Firebase Admin is used only by the

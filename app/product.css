@@ -149,6 +149,27 @@
 @media print { .departure-hero,.rulebook-section,.questions-section,.build-note { display:none!important; } }
 
 /* Final frontend pass: visible orientation, comfortable targets and readable mobile forms. */
+.scope-notice,.evidence-note { padding:20px; margin:20px 0; border:1px solid #c8bda7; background:#f4efe4; font-size:14px; line-height:1.8; color:#34445c; }
+.scope-notice a,.evidence-note a { text-decoration:underline; text-underline-offset:3px; }
+.evidence-note h3 { font-size:18px; font-weight:600; margin-bottom:12px; }
+.evidence-note ul { padding-left:20px; }
+.evidence-note li { margin-block:8px; }
+.history-choice { margin-block:24px; border-top:1px solid #d8d1c3; padding-top:24px; }
+.history-choice label { display:flex; gap:12px; align-items:center; min-height:44px; font-size:14px; line-height:1.7; }
+.history-choice input { width:20px; height:20px; flex-shrink:0; }
+.history-choice p { font-size:13px; line-height:1.8; color:#536179; }
+.history-choice button { min-height:44px; text-decoration:underline; font-size:13px; margin-top:8px; }
+.trust-page h1 { font-family:var(--font-display); font-weight:500; font-size:clamp(32px,5vw,48px); line-height:1.2; margin-bottom:25px; }
+.trust-page p,.trust-page li { font-size:16px; line-height:1.85; }
+.trust-page a { text-decoration:underline; text-underline-offset:3px; }
+.trust-page ul { padding-left:22px; margin-block:16px; }
+.coverage-table { overflow-x:auto; margin-block:24px; }
+.coverage-table table { width:100%; border-collapse:collapse; font-size:14px; line-height:1.8; }
+.coverage-table th,.coverage-table td { text-align:left; vertical-align:top; padding:14px 12px; border:1px solid #d8d1c3; min-width:120px; }
+.coverage-table caption { text-align:left; font-weight:600; margin-bottom:12px; }
+.preview-disclaimer,.route-hint,.form-note p,.confidence-note,.rights-small,.verdict-foot { font-size:12px!important; line-height:1.8; }
+input::placeholder,textarea::placeholder { color:#596578!important; }
+@media print { .evidence-note,.scope-notice,.history-choice { display:none!important; } }
 .nav-inner nav a { display:inline-flex; align-items:center; min-height:44px; border-bottom:2px solid transparent; }
 .nav-inner nav a[aria-current=page] { color:var(--color-navy-900); border-bottom-color:var(--color-brass-dark); }
 .nav-cta,.demo-button,.roadmap-controls button,.history-section>div button { min-height:44px; }

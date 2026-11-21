@@ -1,5 +1,24 @@
 # Release readiness — 19 October 2026
 
+## Current decision — 21 November 2026
+
+**Not ready for public promotion/Product Hunt.** Naming collision, legal review,
+operator name/country, live Firebase/edge controls and outside-user pilot remain
+gates. Support contact supplied: kunalshinde1805@gmail.com. Owner will deploy staging.
+The latest code includes dependency patches, exact delay input, opt-in30-day local
+history, explicit AI opt-in, validity checks before the shared budget, a kill switch
+and new coverage/use notices. See independent-launch-review.md and
+firebase-deploy-handoff.md. Historical October evidence below is not current approval.
+
+## Update — 24 October 2026
+
+Frontend completion, 236-test suite, build, HTTP smoke and actual desktop/mobile
+journeys now pass. Source is public at https://github.com/kunalshinde1214/skyclaim
+under MIT, and the initial GitHub-hosted CI run passed. A local 103-second silent
+demo walkthrough is prepared. See frontend-completion.md and submission-status.md.
+Live Firebase operation and legal/privacy/learner/entry gates remain incomplete.
+The following table preserves the original 19 October evidence.
+
 **Status: hardened release candidate, verified locally. A live production service
 has not yet been verified.** The user selected preparation for a new Firebase
 project; account/billing and the first cloud rollout remain outside this local run.

@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { POST } from "../app/api/evaluate/route";
 import { draftClaim } from "../lib/llm";
 import { evaluateClaim } from "../lib/eu261";
@@ -19,6 +19,7 @@ describe("evaluate API", () => {
 });
 
 describe("bounded AI adapter and independent letter", () => {
+  beforeEach(() => vi.stubEnv("SKYCLAIM_ENABLE_AI", "true"));
   const prose = "Routine technical faults are generally part of running an airline. Ask for the specific cause and evidence of the reasonable measures taken. Exceptional underlying events may require a different assessment.";
   const modelResponse = (content: unknown) => Response.json({ output: [{ type: "message", content: [{ type: "output_text", text: JSON.stringify(content) }] }] });
   it("accepts valid optional prose without letting the model supply the letter", async () => { vi.stubEnv("OPENAI_API_KEY", "test-only"); const fetcher = vi.fn().mockResolvedValue(modelResponse({ explanation: prose })); vi.stubGlobal("fetch", fetcher); const result = await draftClaim(flight, evaluateClaim(flight)); expect(result.mode).toBe("ai"); expect(result.drafted.excuseRebuttal).toBe(prose); expect(result.drafted.claimLetter).toContain("EUR 1200"); expect(fetcher).toHaveBeenCalledTimes(1); const body = JSON.parse(fetcher.mock.calls[0][1].body); expect(body.input).not.toContain("AF 008"); expect(body.store).toBe(false); });

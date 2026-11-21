@@ -1,5 +1,17 @@
 # SkyClaim
 
+**Working name; public Product Hunt launch is blocked pending name clearance,
+qualified legal review and live Firebase acceptance.** Existing aviation services
+use similar names; this project claims no affiliation. See the
+[outside-view review](docs/independent-launch-review.md),
+[Product Hunt release plan](docs/product-hunt-release-plan.md), and
+[Firebase deployment handoff](docs/firebase-deploy-handoff.md).
+
+21 November update: exact delay durations, opt-in30-day local history, explicit AI
+opt-in, clearer coverage/evidence disclosures, public support contact and an
+assessment kill switch. `npm run launch:check` reports actual unresolved gates;
+it is not a legal certificate. The earlier October video is a historical demo.
+
 A passenger-rights checker for EU261, India DGCA and US DOT, with separate cash,
 refund and assistance outcomes, and a letter you can copy or print. Built with Next.js App Router,
 TypeScript, Tailwind CSS and the supplied **The Verdict** design system.
@@ -50,7 +62,7 @@ a real key. No credentials are needed for the demonstration.
   thresholds, the reduced long-haul band, and per-passenger totals.
 - Eligible, below-threshold, conditional, and outside-scope outcomes.
 - Explanation per airline reason and evidence requests for uncertain cases.
-- Deterministic letters, clipboard copying, and a letter-only print stylesheet.
+- Deterministic letters, clipboard copying, UTF-8 text download, and a letter-only print stylesheet.
 - Optional private letter details, a live preview, a completion checklist, and an
   opt-in care-expenses paragraph. Personal details exist only in page memory.
 - Last five flight inputs in browser storage, with a clear-history control.
@@ -150,6 +162,9 @@ an already-started production build. See these prepared reports:
 - [Applied reusable workflow](docs/workflow-run.md)
 - [Idea-to-product skill and prompt](workflows/idea-to-product/SKILL.md)
 
+Public source: https://github.com/kunalshinde1214/skyclaim.
+Frontend completion is verified with 236 tests, a production build, HTTP checks
+and real desktop/mobile journeys. The initial hosted CI run passed.
 Original code is licensed under MIT; see LICENSE and THIRD_PARTY_NOTICES.md.
 The dated continuation record is in devpost/README.md, with technical status in
 docs/frontend-completion.md and remaining entry work in docs/submission-status.md.

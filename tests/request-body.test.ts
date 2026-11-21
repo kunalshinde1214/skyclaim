@@ -57,13 +57,13 @@ describe("bounded request body", () => {
 
 describe("cancelled optional drafting", () => {
   it("does not call the provider for an already-cancelled check", async () => {
-    vi.stubEnv("OPENAI_API_KEY", "test-only"); const fetcher = vi.fn(); vi.stubGlobal("fetch", fetcher);
+    vi.stubEnv("OPENAI_API_KEY", "test-only"); vi.stubEnv("SKYCLAIM_ENABLE_AI", "true"); const fetcher = vi.fn(); vi.stubGlobal("fetch", fetcher);
     const controller = new AbortController(); controller.abort();
     expect((await draftClaim(flight, evaluateClaim(flight), controller.signal)).mode).toBe("template");
     expect(fetcher).not.toHaveBeenCalled();
   });
   it("aborts the provider and skips the retry after cancellation", async () => {
-    vi.stubEnv("OPENAI_API_KEY", "test-only"); const controller = new AbortController();
+    vi.stubEnv("OPENAI_API_KEY", "test-only"); vi.stubEnv("SKYCLAIM_ENABLE_AI", "true"); const controller = new AbortController();
     const fetcher = vi.fn<typeof fetch>().mockImplementation((_url, init) => new Promise((_resolve, reject) => {
       init?.signal?.addEventListener("abort", () => reject(new DOMException("Aborted", "AbortError")), { once: true });
     }));

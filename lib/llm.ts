@@ -48,7 +48,7 @@ export async function draftClaim(input: ClaimInput, computed: Assessment, signal
     confidenceNote: "Based on the facts you provided. The airline's evidence can change the outcome.",
   };
   const key = process.env.OPENAI_API_KEY;
-  if (!key || !canDraft || process.env.SKYCLAIM_ENABLE_AI === "false") return { drafted, mode: "template" };
+  if (!key || !canDraft || process.env.SKYCLAIM_ENABLE_AI !== "true") return { drafted, mode: "template" };
 
   for (let attempt = 0; attempt < 2; attempt++) {
     if (signal?.aborted) break;

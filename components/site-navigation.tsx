@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation";
 const links = [
   { href: "/#check", path: "/", label: "Check a flight" },
   { href: "/roadmap", path: "/roadmap", label: "What’s next" },
-  { href: "/hackathon", path: "/hackathon", label: "The build" },
+  { href: "/trust", path: "/trust", label: "Coverage & trust" },
 ];
 
 export function SiteNavigation() {

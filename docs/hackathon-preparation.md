@@ -104,4 +104,7 @@ These are proposed working dates, not claims that those actions have happened.
 - [ ] Submit on Devpost and verify the actual confirmation.
 
 No repository publication, video upload, Discord message or event submission was
-performed by this development task. These actions have not been represented as done.
+performed in the original 19 October pass. On 24 October, the MIT-licensed source
+was published at https://github.com/kunalshinde1214/skyclaim and checked signed out.
+A 103-second local silent walkthrough is prepared; an allowed public video-host
+URL and actual Devpost submission are still pending. See submission-status.md.

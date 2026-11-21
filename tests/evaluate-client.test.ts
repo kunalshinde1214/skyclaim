@@ -98,8 +98,9 @@ describe("recoverable check requests", () => {
     expect(fetcher.mock.calls[0][1]!.signal!.aborted).toBe(false);
     expect(vi.getTimerCount()).toBe(0);
   });
-  it("uses readable messages for empty and fractional arrival delays", () => {
-    for (const [value, message] of [[NaN, "Enter the arrival delay in hours."], [3.25, "Use half-hour steps, such as 3 or 3.5 hours."]] as const) {
+  it("rejects an empty delay without forcing accurate durations to be rounded", () => {
+    expect(claimSchema.safeParse({ ...flight, delayHours: 3.25 }).success).toBe(true);
+    for (const [value, message] of [[NaN, "Enter the arrival delay in hours."]] as const) {
       const parsed = claimSchema.safeParse({ ...flight, delayHours: value });
       expect(parsed.success).toBe(false);
       if (!parsed.success) expect(parsed.error.issues.find((issue) => issue.path[0] === "delayHours")?.message).toBe(message);

@@ -1,0 +1,14 @@
+{
+  "reviewDate": "2026-11-21",
+  "note": "Engineering release gates, not a legal certification. Set ready only after recording real evidence and reviewer ownership.",
+  "gates": [
+    { "id": "brand", "title": "Name clearance or reviewed rename", "status": "blocked", "owner": "Product owner / qualified trademark reviewer", "evidence": "Existing aviation businesses use SkyClaim. No clearance is claimed." },
+    { "id": "legal", "title": "Aviation rules, draft letters and service classification reviewed", "status": "blocked", "owner": "Qualified counsel for launch markets", "evidence": "Code/source checks are not independent legal sign-off." },
+    { "id": "operator", "title": "Operator identity, privacy notice and monitored contact", "status": "blocked", "owner": "Product owner", "evidence": "Support email supplied. Legal operator name, country, hosting/log retention and final notices pending." },
+    { "id": "cloud", "title": "Live Firebase and public core journeys verified", "status": "blocked", "owner": "Deployment owner", "evidence": "User will deploy and supply the URL. IAM, TTL, counter, error and rollback acceptance pending." },
+    { "id": "abuse", "title": "Edge abuse control and measured budget behavior", "status": "blocked", "owner": "Deployment owner", "evidence": "Shared counter is cost control, not per-client fairness. Validate edge admission and database request costs." },
+    { "id": "quality", "title": "Production browser, accessibility and print acceptance", "status": "blocked", "owner": "QA / product owner", "evidence": "Local regressions do not establish all live-device and assistive-technology behavior." },
+    { "id": "demand", "title": "Outside-user pilot with observed completed tasks", "status": "blocked", "owner": "Product owner", "evidence": "No independent user-study results or recovery outcomes have been supplied." },
+    { "id": "listing", "title": "Accurate Product Hunt listing and final assets", "status": "blocked", "owner": "Product owner", "evidence": "Use cleared brand and verified live URL; screenshots/video must match the deployed product." }
+  ]
+}

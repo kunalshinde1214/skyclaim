@@ -10,6 +10,7 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "smoke": "node scripts/smoke-check.mjs",
+    "launch:check": "node scripts/check-launch.mjs",
     "verify": "npm run typecheck && npm test && npm run build"
   },
   "dependencies": {

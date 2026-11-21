@@ -2,7 +2,7 @@ import { claimSchema } from "../../../lib/schema";
 import { assessClaim } from "../../../lib/assess";
 import { draftClaim } from "../../../lib/llm";
 import { readJsonRequest, RequestBodyError } from "../../../lib/read-json-request";
-import { admitEvaluation } from "../../../lib/request-budget";
+import { admitEvaluation, checkEvaluationAccess } from "../../../lib/request-budget";
 
 export const runtime = "nodejs";
 
@@ -10,7 +10,7 @@ const headers = { "Cache-Control": "no-store" };
 
 export async function POST(request: Request) {
   try {
-    const rejection = await admitEvaluation(request);
+    const rejection = checkEvaluationAccess(request);
     if (rejection) return rejection;
     const parsed = await readJsonRequest(request);
     const validation = claimSchema.safeParse(parsed);
@@ -19,6 +19,10 @@ export async function POST(request: Request) {
       return Response.json({ error: "Check the highlighted flight details.", fields }, { status: 422, headers });
     }
     const input = validation.data;
+    // Malformed, oversized and invalid requests must not spend a shared database
+    // budget or let one invalid-request sender deny legitimate checks to everyone.
+    const budgetRejection = await admitEvaluation(request);
+    if (budgetRejection) return budgetRejection;
     const computed = assessClaim(input);
     const draft = await draftClaim(input, computed, request.signal);
     return Response.json({ input, computed, ...draft }, { headers });

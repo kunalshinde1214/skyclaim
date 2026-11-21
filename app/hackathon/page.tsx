@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
+import { pageMetadata } from "../../lib/site-metadata";
 import Link from "next/link";
 import { SiteHeader, SiteFooter } from "../../components/site-chrome";
-export const metadata: Metadata = { title: "Hackathon field notes · SkyClaim" };
+export const metadata: Metadata = pageMetadata("Hackathon field notes · SkyClaim", "SkyClaim’s Build With AI: Basics field notes: the working product, official judging criteria, demonstration plan and remaining submission requirements.", "/hackathon");
 const official = "https://learn-ai-basics.devpost.com/";
 export default function HackathonPage() {
   return <><a href="#main" className="skip-link">Skip to content</a><SiteHeader /><main id="main"><section className="page-masthead hackathon-masthead"><div className="shell"><Link href="/" className="back-link">← Back to the product</Link><p className="eyebrow">Build With AI: Basics · October 2026</p><h1>Show the journey.<br /><em>Make the case.</em></h1><p className="page-deck">SkyClaim’s hackathon field notes: what the product demonstrates, what the judges need to see, and what still belongs to the builder.</p><div className="event-deadline"><span>Official submission deadline</span><strong><time dateTime="2026-10-26T21:00:00Z">27 October 2026 · 02:30 IST</time></strong><small>26 October · 17:00 EDT · verified 19 October 2026</small></div><a href={official} target="_blank" rel="noreferrer" className="quiet-link">Official event page ↗</a></div></section><div className="shell page-body">

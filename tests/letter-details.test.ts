@@ -80,7 +80,7 @@ describe("flight-only history", () => {
   });
   it("strips personal and unknown fields from previously stored entries", () => {
     const stored = JSON.stringify([{ input: { ...flight, ...details }, savedAt: "2026-10-18T08:00:00Z", personal: details }]);
-    const history = readHistory(stored);
+    const history = readHistory(stored, Date.parse("2026-10-19T08:00:00Z"));
     expect(history).toHaveLength(1);
     expect(history[0].input).toEqual(flight);
     expect(JSON.stringify(history)).not.toContain("Jordan");
@@ -92,7 +92,7 @@ describe("flight-only history", () => {
     expect(history).toHaveLength(5);
     expect(history[0].input.flightNumber).toBe("AF 106");
     expect(history[4].input.flightNumber).toBe("AF 102");
-    const restored = readHistory(JSON.stringify([...history, history[0]]));
+    const restored = readHistory(JSON.stringify([...history, history[0]]), Date.parse("2026-10-19T08:00:00Z"));
     expect(restored).toEqual(history);
   });
   it("distinguishes checks of the same flight with different delays", () => {

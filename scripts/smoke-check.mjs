@@ -23,7 +23,7 @@ assert.equal(page.headers.get("x-content-type-options"), "nosniff");
 assert.equal(page.headers.get("permissions-policy"), "camera=(), microphone=(), geolocation=(), payment=()");
 const secondPage = await fetch(base);
 assert.notEqual(secondPage.headers.get("content-security-policy"), csp);
-for (const path of ["/roadmap", "/hackathon", "/privacy", "/api/health"]) {
+for (const path of ["/roadmap", "/trust", "/terms", "/privacy", "/api/health"]) {
   const response = await fetch(new URL(path, base));
   assert.equal(response.status, 200, path);
 }
